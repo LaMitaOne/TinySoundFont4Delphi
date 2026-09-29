@@ -25,6 +25,8 @@ TinySoundFont is a software synthesizer for playing SoundFont2 (.sf2) files. Thi
     Delphi 10.x, 11.x, or 12.x (RAD Studio). The project is configured for the x64 (64-bit) platform.
     A valid SoundFont2 (.sf2) file.
       
+!!! TRY this one too "FluidR3 GM.sf2" at https://github.com/urish/cinto/tree/master/media     
+      
 ⚙️ How to Compile the DLL     
      
 The Delphi wrapper requires a compiled tinysoundfont.dll. A pre-compiled 64-bit DLL is included in the sample folder, but you can compile it yourself using Microsoft Visual Studio.      
