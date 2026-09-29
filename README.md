@@ -12,6 +12,7 @@ TinySoundFont is a software synthesizer for playing SoundFont2 (.sf2) files. Thi
     Cracke-free Double Buffering: Implements a Ping-Pong audio buffer system via MMSystem (waveOut) to ensure seamless, high-quality 32-bit float audio playback.
     Built-in Sequencer: The demo includes an 8-bit style melody sequencer, showing how to trigger MIDI notes dynamically over time.
     Ready for VCL & FMX: The wrapper unit is pure Object Pascal, ready for any Delphi framework.
+    Sample includes 8bitsf.SF2
       
 📦 Repository Contents     
       
