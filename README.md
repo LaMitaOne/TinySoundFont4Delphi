@@ -26,7 +26,7 @@ TinySoundFont is a software synthesizer for playing SoundFont2 (.sf2) files. Thi
     A valid SoundFont2 (.sf2) file.
      
 included 8bitsf.SF2 is 8 bit game style but this...     
-!!! TRY this one too "FluidR3 GM.sf2" at https://github.com/urish/cinto/tree/master/media     
+🚨 TRY this one too "FluidR3 GM.sf2" at https://github.com/urish/cinto/tree/master/media ❗     
 :D you will like it   
       
 ⚙️ How to Compile the DLL     
