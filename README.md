@@ -29,7 +29,8 @@ The Delphi wrapper requires a compiled tinysoundfont.dll. 64 bit dll included in
       
     cl /O2 /LD tinysoundfont.c
       
-(Note: The C code in the compileDLL folder uses __declspec(dllexport) and prefixes all functions with dll_tsf_ to ensure clean, compatible exports for Delphi).
+(Note: The C code in the compileDLL folder uses __declspec(dllexport) and prefixes all functions with dll_tsf_ to ensure clean, compatible exports for Delphi).    
+     
 How to use the Demo   
         
     Open the project in Delphi, select the 64-bit Windows target platform, and compile it.
@@ -37,7 +38,9 @@ How to use the Demo
     Run the application.
     Click "Init Audio" to load the DLL and initialize the Windows sound card.
     Click "Load Soundfont" and select any .sf2 file on your computer.
-    Click "Play Ting" to play a middle C (Note 60) note. You will hear it through your speakers.
+    Click "Play Ting" to play a middle C (Note 60) note. You will hear it through your speakers.     
+     
+Free sf2 files you can find here https://www.zanderjaz.com/downloads/soundfonts/     
       
 License   
    
