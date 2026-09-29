@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.323,C:\Users\Lenovo\Documents\Embarcadero\Studio\Projekte\Unit1.pas=C:\Users\Lenovo\Downloads\Tinysoundfont\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.222,=C:\Users\Lenovo\Downloads\Tinysoundfont\MiniAudio4Delphi.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.323,C:\Users\Lenovo\Documents\Embarcadero\Studio\Projekte\Unit1.dfm=C:\Users\Lenovo\Downloads\Tinysoundfont\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.146,=C:\Users\Lenovo\Documents\Embarcadero\Studio\Projekte\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.384,=C:\Users\Lenovo\Documents\Embarcadero\Studio\Projekte\Unit2.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.570,C:\Users\Lenovo\Documents\Embarcadero\Studio\Projekte\Unit2.pas=C:\Users\Lenovo\Downloads\Tinysoundfont\TinySoundFont.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.868,C:\Users\Lenovo\Documents\Embarcadero\Studio\Projekte\Project1.dproj=C:\Users\Lenovo\Downloads\Tinysoundfont\Project1.dproj</Transaction>
+    <Transaction>2026.09.29 10:54:21.352,C:\Users\Lenovo\Downloads\Tinysoundfont\MiniAudio4Delphi.pas=</Transaction>
+  </Transactions>
+</BorlandProject>
