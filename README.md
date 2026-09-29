@@ -15,7 +15,7 @@ Requirements
     
     Delphi 10.x, 11.x, or 12.x ( RAD Studio ). The project is configured for the x64 (64-bit) platform.   
     A compiled tinysoundfont.dll (see compilation instructions below).   
-    A SoundFont2 (.sf2) file to test the demo.   
+    A SoundFont2 (.sf2) file to test the demo. (included 8bitsf.SF2)   
     
 How to Compile the DLL    
     
