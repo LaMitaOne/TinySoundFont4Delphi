@@ -17,7 +17,7 @@ Requirements
     
 How to Compile the DLL    
     
-The Delphi wrapper requires a compiled tinysoundfont.dll. You can compile this yourself using Microsoft Visual Studio.   
+The Delphi wrapper requires a compiled tinysoundfont.dll. 64 bit dll included in sample. You can compile this yourself using Microsoft Visual Studio.   
    
     Download the original tsf.h header file from the official TinySoundFont repository.
    
