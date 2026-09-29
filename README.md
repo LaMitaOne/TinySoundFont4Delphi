@@ -1,4 +1,4 @@
-# Tinysoundfont4delphi
+# TinySoundFont4Delphi
 A complete Delphi wrapper for Bernhard Schelling's TinySoundFont (v0.9) library.
       
 TinySoundFont is a software synthesizer for playing SoundFont2 (.sf2) files. This repository provides everything you need to integrate it into a Delphi (VCL/FMX) application, including a working demo project.      
