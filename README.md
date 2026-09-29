@@ -36,7 +36,8 @@ The Delphi wrapper requires a compiled tinysoundfont.dll. A pre-compiled 64-bit 
     
     cl /O2 /LD tinysoundfont.c
       
-(Note: The C code in the compileDLL folder uses __declspec(dllexport) and prefixes all functions with dll_tsf_ to ensure clean, compatible exports for Delphi).
+(Note: The C code in the compileDLL folder uses __declspec(dllexport) and prefixes all functions with dll_tsf_ to ensure clean, compatible exports for Delphi).   
+     
 ▶️ How to Run the Demo      
       
     Open the project in Delphi, select the 64-bit Windows target platform, and compile it.
