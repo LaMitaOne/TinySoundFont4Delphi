@@ -5,6 +5,8 @@ TinySoundFont is a software synthesizer for playing SoundFont2 (.sf2) files. Thi
       
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/LaMitaOne/Tinysoundfont4delphi)    
      
+https://github.com/user-attachments/assets/e71a144c-a7a6-460a-b416-9ecebc22ad7e
+     
 🚀 Features of this Wrapper & Demo    
      
     Complete API Mapping: Fully exposes all tsf_ functions, including channel-based preset and note control.
