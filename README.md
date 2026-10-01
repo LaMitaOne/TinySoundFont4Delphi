@@ -11,9 +11,12 @@ TinySoundFont is a software synthesizer for playing SoundFont2 (.sf2) files. Thi
     Threaded Audio Synthesizing: No UI freezes! The demo uses a background TThread combined with TStopwatch (QPC) to pump audio data without blocking the main form.
     Cracke-free Double Buffering: Implements a Ping-Pong audio buffer system via MMSystem (waveOut) to ensure seamless, high-quality 32-bit float audio playback.
     Built-in Sequencer: The demo includes an 8-bit style melody sequencer, showing how to trigger MIDI notes dynamically over time.
-    Ready for VCL & FMX: The wrapper unit is pure Object Pascal, ready for any Delphi framework.
-    Sample includes 8bitsf.SF2
-      
+    Ready for VCL & FMX: The wrapper unit is pure Object Pascal, ready for any Delphi framework.     
+         
+included 8bitsf.SF2 is 8 bit game style but this...     
+🚨 TRY this one too "FluidR3 GM.sf2" at https://github.com/urish/cinto/tree/master/media ❗     
+:D you will like it   
+       
 📦 Repository Contents     
       
     TinySoundFont.pas: The complete Delphi wrapper unit. It dynamically loads the TinySoundFont DLL and exposes all available functions (loading, rendering, channel control, etc.).
@@ -25,10 +28,6 @@ TinySoundFont is a software synthesizer for playing SoundFont2 (.sf2) files. Thi
     Delphi 10.x, 11.x, or 12.x (RAD Studio). The project is configured for the x64 (64-bit) platform.
     A valid SoundFont2 (.sf2) file.
      
-included 8bitsf.SF2 is 8 bit game style but this...     
-🚨 TRY this one too "FluidR3 GM.sf2" at https://github.com/urish/cinto/tree/master/media ❗     
-:D you will like it   
-      
 ⚙️ How to Compile the DLL     
      
 The Delphi wrapper requires a compiled tinysoundfont.dll. A pre-compiled 64-bit DLL is included in the sample folder, but you can compile it yourself using Microsoft Visual Studio.      
