@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 265
-  ClientWidth = 569
+  ClientHeight = 319
+  ClientWidth = 576
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,15 +14,15 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   TextHeight = 15
   object lblStatus: TLabel
-    Left = 56
-    Top = 216
+    Left = 16
+    Top = 39
     Width = 45
     Height = 15
     Caption = 'lblStatus'
   end
   object btnLoadSoundfont: TButton
-    Left = 40
-    Top = 72
+    Left = 89
+    Top = 8
     Width = 105
     Height = 25
     Caption = 'LoadSoundfont'
@@ -30,8 +30,8 @@ object Form1: TForm1
     OnClick = btnLoadSoundfontClick
   end
   object btnInitAudio: TButton
-    Left = 40
-    Top = 32
+    Left = 8
+    Top = 8
     Width = 75
     Height = 25
     Caption = 'init'
@@ -39,8 +39,8 @@ object Form1: TForm1
     OnClick = btnInitAudioClick
   end
   object btnPlayTing: TButton
-    Left = 40
-    Top = 120
+    Left = 200
+    Top = 8
     Width = 75
     Height = 25
     Caption = 'play'
@@ -48,8 +48,8 @@ object Form1: TForm1
     OnClick = btnPlayTingClick
   end
   object btnStop: TButton
-    Left = 42
-    Top = 161
+    Left = 281
+    Top = 8
     Width = 75
     Height = 25
     Caption = 'Stop'

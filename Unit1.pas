@@ -4,15 +4,18 @@ unit Unit1;
  *  TinySoundFont - High Precision Threaded Audio Demo (Double Buffered)
  *------------------------------------------------------------------------------
  *  This demo shows how to use the TinySoundFont wrapper in Delphi.
- *  Uses a background thread with QPC (TStopwatch) and Double Buffering
- *  to provide seamless, crackle-free audio without blocking the UI.
+ *  Features:
+ *  - Fixed dynamic UI Piano (TPanels)
+ *  - Audio Thread starts on Soundfont load (Live Play enabled immediately)
+ *  - Sequencer triggers on btnPlayTing, loops infinitely, stops on btnStop
  *==============================================================================}
+
 interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Forms, Vcl.Dialogs,
   Vcl.StdCtrls, MMSystem, TinySoundFont, Vcl.Controls, Vcl.ExtCtrls,
-  System.SyncObjs, System.Diagnostics;
+  System.SyncObjs, System.Diagnostics, Vcl.Graphics;
 
 type
   TForm1 = class(TForm)
@@ -34,37 +37,48 @@ type
     FDLLLoaded: Boolean;
     FWaveOut: HWAVEOUT;
 
-    // Double Buffering Setup (2x 500ms = 1 Second total)
     FBuffer: PSingle;
     FWaveHdr: array[0..1] of TWaveHdr;
     FChunkBytes: Cardinal;
-
     FAudioThread: TThread;
     FLock: TCriticalSection;
     FIsPlaying: Boolean;
 
-    // Melody: [Note, Duration in seconds]
     FMelody: array[0..15, 0..1] of Double;
     FNoteIndex: Integer;
     FNextNoteTime: Double;
+    FPlaySequence: Boolean;
 
     procedure LoadTSFDLL;
     procedure InitMMSystem;
     procedure CloseMMSystem;
     procedure StartAudioThread;
     procedure StopAudioThread;
+
+    procedure CreatePianoKeys;
+    procedure PlayLiveNote(Note: Integer);
+    procedure KeyPanelMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure KeyPanelMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
-    { Public Declarations }
   end;
 
 var
   Form1: TForm1;
 
 implementation
+
 {$R *.dfm}
 
 const
   WAVE_FORMAT_IEEE_FLOAT = 3;
+  PIANO_START_NOTE = 48;
+  PIANO_OCTAVES = 2;
+
+  // Fixed layout sizes
+  WHITE_KEY_W = 40;
+  BLACK_KEY_W = 28;   // INCREASED slightly for better clickability
+  KEYBOARD_TOP = 140;
+  KEYBOARD_BOTTOM_MARGIN = 10;
 
 { TForm1 }
 
@@ -76,6 +90,7 @@ begin
   FBuffer := nil;
   FLock := TCriticalSection.Create;
   FIsPlaying := False;
+  FPlaySequence := False;
 
   lblStatus.Caption := 'Ready. Please initialize Audio...';
 
@@ -96,16 +111,120 @@ begin
   FMelody[13, 0] := 0;  FMelody[13, 1] := 0.50;
   FMelody[14, 0] := 72; FMelody[14, 1] := 0.50;
   FMelody[15, 0] := 0;  FMelody[15, 1] := 1.00;
+
+  // Build the visual Piano dynamically ONCE
+  CreatePianoKeys;
+end;
+
+procedure TForm1.CreatePianoKeys;
+const
+  // 0 = No key, 1 = White Key, 2 = Black Key
+  KeyPattern: array[0..11] of Integer = (1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 1);
+var
+  I, Octave: Integer;
+  CurrentNote: Integer;
+  X: Integer;
+  Pnl: TPanel;
+  BlackKeyOffset: Integer;
+  WhiteKeyH, BlackKeyH: Integer;
+begin
+  BlackKeyOffset := (WHITE_KEY_W - BLACK_KEY_W) div 2;
+  X := 10;
+  CurrentNote := PIANO_START_NOTE;
+
+  WhiteKeyH := ClientHeight - KEYBOARD_TOP - KEYBOARD_BOTTOM_MARGIN;
+  BlackKeyH := (WhiteKeyH * 62) div 100;
+
+  for Octave := 0 to PIANO_OCTAVES - 1 do
+  begin
+    for I := 0 to 11 do
+    begin
+      if KeyPattern[I] = 1 then
+      begin
+        // White Key
+        Pnl := TPanel.Create(Self);
+        Pnl.Parent := Self;
+        Pnl.SetBounds(X, KEYBOARD_TOP, WHITE_KEY_W, WhiteKeyH);
+
+        if (CurrentNote mod 12) = 0 then
+          Pnl.Caption := 'C' + IntToStr((CurrentNote div 12) - 1)
+        else
+          Pnl.Caption := '';
+
+        Pnl.Tag := CurrentNote;
+        Pnl.Hint := 'W';
+        Pnl.OnMouseDown := KeyPanelMouseDown;
+        Pnl.OnMouseUp := KeyPanelMouseUp;
+        Pnl.Font.Style := [fsBold];
+        Pnl.Color := clWhite;
+        Pnl.ParentBackground := False;
+        Pnl.BevelOuter := bvNone;
+        Pnl.BevelKind := bkTile;
+        Pnl.Anchors := [akLeft, akTop];
+
+        X := X + WHITE_KEY_W;
+      end
+      else if KeyPattern[I] = 2 then
+      begin
+        // Black Key (Direct on Form, overlaid on top of White Key visually)
+        Pnl := TPanel.Create(Self);
+        Pnl.Parent := Self;
+        Pnl.BringToFront;
+
+        Pnl.SetBounds(X - BlackKeyOffset, KEYBOARD_TOP, BLACK_KEY_W, BlackKeyH);
+        Pnl.Caption := '';
+        Pnl.Tag := CurrentNote + 1;
+        Pnl.Hint := 'B';
+        Pnl.OnMouseDown := KeyPanelMouseDown;
+        Pnl.OnMouseUp := KeyPanelMouseUp;
+        Pnl.Color := clBlack;
+        Pnl.ParentBackground := False;
+        Pnl.BevelOuter := bvNone;
+        Pnl.BevelKind := bkTile;
+        Pnl.Anchors := [akLeft, akTop];
+        Pnl.BringToFront;
+      end;
+
+      CurrentNote := CurrentNote + 1;
+    end;
+  end;
+end;
+
+procedure TForm1.KeyPanelMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if (Button = mbLeft) and Assigned(FTSF) then
+  begin
+    PlayLiveNote(TPanel(Sender).Tag);
+    TPanel(Sender).Color := clBtnFace;
+  end;
+end;
+
+procedure TForm1.KeyPanelMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if TPanel(Sender).Hint = 'B' then
+    TPanel(Sender).Color := clBlack
+  else
+    TPanel(Sender).Color := clWhite;
+end;
+
+procedure TForm1.PlayLiveNote(Note: Integer);
+begin
+  if Assigned(FTSF) then
+    tsf_channel_note_on(FTSF, 0, Note, 1.0);
 end;
 
 procedure TForm1.LoadTSFDLL;
+var
+  DllPath: string;
 begin
-  FTSFDLL := SafeLoadLibrary(ExtractFilePath(ParamStr(0)) + 'tinysoundfont.dll');
+  DllPath := ExtractFilePath(ParamStr(0)) + 'tinysoundfont.dll';
+  FTSFDLL := SafeLoadLibrary(DllPath);
   if FTSFDLL = 0 then
   begin
     lblStatus.Caption := 'Error: tinysoundfont.dll not found!';
     Exit;
   end;
+
   @tsf_load_filename := GetProcAddress(FTSFDLL, 'dll_tsf_load_filename');
   @tsf_close := GetProcAddress(FTSFDLL, 'dll_tsf_close');
   @tsf_set_output := GetProcAddress(FTSFDLL, 'dll_tsf_set_output');
@@ -126,7 +245,9 @@ begin
     LoadTSFDLL;
   if not FDLLLoaded then
     Exit;
+
   InitMMSystem;
+
   if FWaveOut <> 0 then
     lblStatus.Caption := 'Audio Engine running! Please load a Soundfont.'
   else
@@ -151,13 +272,10 @@ begin
     Exit;
   end;
 
-  // Allocate 1 Second total, split into 2 halves (500ms each)
-  // 500ms = 22050 frames = 176400 bytes
   FChunkBytes := 176400;
   GetMem(FBuffer, FChunkBytes * 2);
   FillChar(FBuffer^, FChunkBytes * 2, 0);
 
-  // Prepare both Wave Headers
   FillChar(FWaveHdr[0], SizeOf(TWaveHdr), 0);
   FWaveHdr[0].lpData := PAnsiChar(FBuffer);
   FWaveHdr[0].dwBufferLength := FChunkBytes;
@@ -179,6 +297,7 @@ begin
     waveOutClose(FWaveOut);
     FWaveOut := 0;
   end;
+
   if Assigned(FBuffer) then
   begin
     FreeMem(FBuffer);
@@ -193,17 +312,24 @@ begin
     ShowMessage('Please do Step 1 (Audio Init) first!');
     Exit;
   end;
+
   OpenDialog1.Filter := 'SoundFont 2 (*.sf2)|*.sf2';
   if OpenDialog1.Execute then
   begin
     if Assigned(FTSF) then
       tsf_close(FTSF);
+
     FTSF := tsf_load_filename(PAnsiChar(AnsiString(OpenDialog1.FileName)));
     if Assigned(FTSF) then
     begin
       tsf_set_output(FTSF, TSF_STEREO_INTERLEAVED, 44100, 0.0);
       tsf_channel_set_presetnumber(FTSF, 0, 0, 0);
-      lblStatus.Caption := 'Soundfont loaded! Ready to play.';
+
+      FPlaySequence := False;
+      FIsPlaying := True;
+      StartAudioThread;
+
+      lblStatus.Caption := 'Soundfont loaded! Play the piano or click Play Ting.';
     end
     else
       lblStatus.Caption := 'Error loading Soundfont!';
@@ -220,16 +346,14 @@ begin
 
   FNoteIndex := -1;
   FNextNoteTime := 0;
-  FIsPlaying := True;
-
-  StartAudioThread;
+  FPlaySequence := True;
   lblStatus.Caption := 'Playing sequence...';
 end;
 
 procedure TForm1.btnStopClick(Sender: TObject);
 begin
-  StopAudioThread;
-  lblStatus.Caption := 'Stopped.';
+  FPlaySequence := False;
+  lblStatus.Caption := 'Sequence stopped. Live piano still active.';
 end;
 
 procedure TForm1.StartAudioThread;
@@ -237,7 +361,6 @@ begin
   if Assigned(FAudioThread) then Exit;
 
   timeBeginPeriod(1);
-
   FAudioThread := TThread.CreateAnonymousThread(
     procedure
     var
@@ -253,43 +376,44 @@ begin
       Timer.Start;
       Freq := Timer.Frequency;
 
-      // 500ms = 22050 frames
       FramesToRender := 22050;
       SpinTicks := (2000000 * Freq) div 1000000000; // 2ms
-
       BufIndex := 0;
-      // Reset timing to start exactly NOW
+
       TargetTicks := Timer.GetTimestamp;
 
       while FIsPlaying do
       begin
         // 1. SEQUENCER LOGIC
-        CurrentTime := Timer.Elapsed.TotalSeconds;
-        while CurrentTime >= FNextNoteTime do
+        if FPlaySequence then
         begin
-          Inc(FNoteIndex);
-          if FNoteIndex >= Length(FMelody) then
-            FNoteIndex := 0;
+          CurrentTime := Timer.Elapsed.TotalSeconds;
+          while CurrentTime >= FNextNoteTime do
+          begin
+            Inc(FNoteIndex);
 
-          if FMelody[FNoteIndex, 0] > 0 then
-            tsf_channel_note_on(FTSF, 0, Round(FMelody[FNoteIndex, 0]), 1.0);
+            if FNoteIndex >= Length(FMelody) then
+              FNoteIndex := 0;
 
-          FNextNoteTime := FNextNoteTime + FMelody[FNoteIndex, 1];
-          CurrentTime := Timer.Elapsed.TotalSeconds; // Update for while-loop check
+            if FMelody[FNoteIndex, 0] > 0 then
+              tsf_channel_note_on(FTSF, 0, Round(FMelody[FNoteIndex, 0]), 1.0);
+
+            FNextNoteTime := FNextNoteTime + FMelody[FNoteIndex, 1];
+            CurrentTime := Timer.Elapsed.TotalSeconds;
+          end;
         end;
 
-        // 2. RENDER AUDIO CHUNK (22050 frames)
-        // We render directly into the correct half of the memory
+        // 2. RENDER AUDIO CHUNK
         tsf_render_float(FTSF, System.PSingle(FWaveHdr[BufIndex].lpData), FramesToRender, 0);
 
-        // 3. QUEUE BUFFER TO SOUNDCARD (NO waveOutReset!)
+        // 3. QUEUE BUFFER TO SOUNDCARD
         waveOutWrite(FWaveOut, @FWaveHdr[BufIndex], SizeOf(TWaveHdr));
 
         // 4. SWITCH BUFFER (Ping-Pong)
-        BufIndex := BufIndex xor 1; // Toggles between 0 and 1
+        BufIndex := BufIndex xor 1;
 
-        // 5. PRECISE PACING (Wait 500ms for the chunk to finish)
-        TargetTicks := TargetTicks + (Freq div 2); // 0.5 seconds
+        // 5. PRECISE PACING
+        TargetTicks := TargetTicks + (Freq div 2);
         NowTicks := Timer.GetTimestamp;
         if TargetTicks <= NowTicks then
           TargetTicks := NowTicks + (Freq div 2);
@@ -300,7 +424,6 @@ begin
         while Timer.GetTimestamp < TargetTicks do ;
       end;
 
-      // Cleanup soundcard on stop
       waveOutReset(FWaveOut);
     end);
 
@@ -322,11 +445,15 @@ end;
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   StopAudioThread;
+
   if Assigned(FTSF) then
     tsf_close(FTSF);
+
   CloseMMSystem;
+
   if FTSFDLL <> 0 then
     FreeLibrary(FTSFDLL);
+
   FreeAndNil(FLock);
 end;
 
